@@ -24,7 +24,7 @@ if (flutterVersionName == null) {
 
 android {
     namespace "com.example.cross_os_ble_demo"
-    compileSdk flutter.compileSdkVersion
+    compileSdk 33
     ndkVersion flutter.ndkVersion
 
     compileOptions {
@@ -45,7 +45,7 @@ android {
         applicationId "com.example.cross_os_ble_demo"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
-        minSdkVersion flutter.minSdkVersion
+        minSdkVersion 30
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
