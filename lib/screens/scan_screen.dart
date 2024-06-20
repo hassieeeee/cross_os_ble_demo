@@ -124,7 +124,23 @@ class _ScanScreenState extends State<ScanScreen> {
   }
 
   List<Widget> _buildScanResultTiles(BuildContext context) {
-    return _scanResults
+
+    // Battery Service
+    String serviceBattery = "0000180F-0000-1000-8000-00805F9B34FB";
+    String characteristicBatteryLevel = "00002A19-0000-1000-8000-00805F9B34FB";
+    // Test service
+    String serviceTest = "0000180D-0000-1000-8000-00805F9B34FB";
+    String characteristicTest = "00002A18-0000-1000-8000-00805F9B34FB";
+
+    String serviceKenkyuu = "db7e2243-3a33-4ebc-944b-1814e86a6299";
+    String characteristicKenkyuuWrite = "6a4b3194-1a96-4af1-9630-bf39807743a1";
+    String characteristicKenkyuuRead = "b42224d1-48be-4ebf-9942-e236d3606b31";
+
+
+    return _scanResults.where((element) {
+      print(element);
+      return element.advertisementData.serviceUuids.contains(Guid(serviceKenkyuu));
+    })
         .map(
           (r) => ScanResultTile(
         result: r,
