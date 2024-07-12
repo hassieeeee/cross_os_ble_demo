@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 import 'device_screen.dart';
+import 'chat_screen.dart';
 import '../utils/snackbar.dart';
 import '../widgets/system_device_tile.dart';
 import '../widgets/scan_result_tile.dart';
@@ -75,12 +76,21 @@ class _ScanScreenState extends State<ScanScreen> {
     }
   }
 
+  // void onConnectPressed(BluetoothDevice device) {
+  //   device.connectAndUpdateStream().catchError((e) {
+  //     Snackbar.show(ABC.c, prettyException("Connect Error:", e), success: false);
+  //   });
+  //   MaterialPageRoute route = MaterialPageRoute(
+  //       builder: (context) => DeviceScreen(device: device), settings: RouteSettings(name: '/DeviceScreen'));
+  //   Navigator.of(context).push(route);
+  // }
+
   void onConnectPressed(BluetoothDevice device) {
     device.connectAndUpdateStream().catchError((e) {
       Snackbar.show(ABC.c, prettyException("Connect Error:", e), success: false);
     });
     MaterialPageRoute route = MaterialPageRoute(
-        builder: (context) => DeviceScreen(device: device), settings: RouteSettings(name: '/DeviceScreen'));
+        builder: (context) => ChatScreen(device: device), settings: RouteSettings(name: '/ChatScreen'));
     Navigator.of(context).push(route);
   }
 

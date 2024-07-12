@@ -4,6 +4,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:collection/collection.dart';
 
 import "../utils/snackbar.dart";
 
@@ -29,10 +30,41 @@ class _CharacteristicTileState extends State<CharacteristicTile> {
     super.initState();
     _lastValueSubscription = widget.characteristic.lastValueStream.listen((value) {
       _value = value;
+      print("valueeeeeeeeeee");
+      print(value);
       if (mounted) {
         setState(() {});
       }
     });
+
+
+    // Future(() async {
+    //   print("setNotifyValue");
+    //   final success = await widget.characteristic.setNotifyValue(true);
+    //   if(success) {
+    //     print("setNotifyValue success!");
+    //   }
+    //   else{
+    //     print("setNotifyValue failed");
+    //   }
+    // });
+
+    // _lastValueSubscription = widget.characteristic.lastValueStream.listen((value) {
+    //   Future(() async {
+    //     print(_value);
+    //     print(value);
+    //     if(!_value.equals(value)){
+    //       print("nooooootify!");
+    //       _value = value;
+    //       await widget.characteristic.read();
+    //     };
+    //   });
+    //
+      if (mounted) {
+        setState(() {});
+      }
+    // });
+
   }
 
   @override
@@ -72,7 +104,13 @@ class _CharacteristicTileState extends State<CharacteristicTile> {
   Future onSubscribePressed() async {
     try {
       String op = c.isNotifying == false ? "Subscribe" : "Unubscribe";
-      await c.setNotifyValue(c.isNotifying == false);
+      bool success = await c.setNotifyValue(c.isNotifying == false);
+      if(success) {
+        print("setNotifyValue success!");
+      }
+      else{
+        print("setNotifyValue failed");
+      }
       Snackbar.show(ABC.c, "$op : Success", success: true);
       if (c.properties.read) {
         await c.read();

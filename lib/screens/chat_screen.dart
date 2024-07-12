@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -9,16 +10,16 @@ import '../widgets/descriptor_tile.dart';
 import '../utils/snackbar.dart';
 import '../utils/extra.dart';
 
-class DeviceScreen extends StatefulWidget {
+class ChatScreen extends StatefulWidget {
   final BluetoothDevice device;
 
-  const DeviceScreen({Key? key, required this.device}) : super(key: key);
+  const ChatScreen({Key? key, required this.device}) : super(key: key);
 
   @override
-  State<DeviceScreen> createState() => _DeviceScreenState();
+  State<ChatScreen> createState() => _DeviceScreenState();
 }
 
-class _DeviceScreenState extends State<DeviceScreen> {
+class _DeviceScreenState extends State<ChatScreen> {
   int? _rssi;
   int? _mtuSize;
   BluetoothConnectionState _connectionState = BluetoothConnectionState.disconnected;
@@ -26,11 +27,22 @@ class _DeviceScreenState extends State<DeviceScreen> {
   bool _isDiscoveringServices = false;
   bool _isConnecting = false;
   bool _isDisconnecting = false;
+  List<int> _readReceivedValue = [];
+  String _writeValue = '';
 
   late StreamSubscription<BluetoothConnectionState> _connectionStateSubscription;
   late StreamSubscription<bool> _isConnectingSubscription;
   late StreamSubscription<bool> _isDisconnectingSubscription;
   late StreamSubscription<int> _mtuSubscription;
+  late BluetoothService _kenkyuuService;
+  late BluetoothCharacteristic _kenkyuuCharactaristicRead;
+  late BluetoothCharacteristic _kenkyuuCharacteristicWrite;
+
+  late StreamSubscription<List<int>> _lastValueSubscription;
+
+  String serviceKenkyuuUuid = "db7e2243-3a33-4ebc-944b-1814e86a6299";
+  String characteristicKenkyuuWriteUuid = "6a4b3194-1a96-4af1-9630-bf39807743a1";
+  String characteristicKenkyuuReadUuid = "b42224d1-48be-4ebf-9942-e236d3606b31";
 
   @override
   void initState() {
@@ -69,6 +81,22 @@ class _DeviceScreenState extends State<DeviceScreen> {
         setState(() {});
       }
     });
+
+    Future(() async {
+      await onConnectPressed();
+      await onRequestMtuPressed();
+      await onDiscoverServicesPressed();
+
+      _lastValueSubscription = _kenkyuuCharactaristicRead.lastValueStream.listen((value) {
+        _readReceivedValue = value;
+        // print("valueeeeeeeeeee");
+        // print(value);
+        if (mounted) {
+          setState(() {});
+        }
+      });
+    });
+
   }
 
   @override
@@ -77,6 +105,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
     _mtuSubscription.cancel();
     _isConnectingSubscription.cancel();
     _isDisconnectingSubscription.cancel();
+    _lastValueSubscription.cancel();
     super.dispose();
   }
 
@@ -127,6 +156,10 @@ class _DeviceScreenState extends State<DeviceScreen> {
     } catch (e) {
       Snackbar.show(ABC.c, prettyException("Discover Services Error:", e), success: false);
     }
+    _kenkyuuService = _services.firstWhere((service) => service.uuid == Guid(serviceKenkyuuUuid));
+    _kenkyuuCharactaristicRead = _kenkyuuService.characteristics.firstWhere((element) => element.uuid == Guid(characteristicKenkyuuReadUuid));
+    _kenkyuuCharacteristicWrite = _kenkyuuService.characteristics.firstWhere((element) => element.uuid == Guid(characteristicKenkyuuWriteUuid));
+
     if (mounted) {
       setState(() {
         _isDiscoveringServices = false;
@@ -143,23 +176,44 @@ class _DeviceScreenState extends State<DeviceScreen> {
     }
   }
 
-  List<Widget> _buildServiceTiles(BuildContext context, BluetoothDevice d) {
-    return _services
-        .map(
-          (s) => ServiceTile(
-            service: s,
-            characteristicTiles: s.characteristics.map((c) => _buildCharacteristicTile(c)).toList(),
-          ),
-        )
-        .toList();
+  Future onRead() async {
+    try {
+      await _kenkyuuCharactaristicRead.read();
+      Snackbar.show(ABC.c, "Read: Success", success: true);
+    } catch (e) {
+      Snackbar.show(ABC.c, prettyException("Read Error:", e), success: false);
+    }
   }
 
-  CharacteristicTile _buildCharacteristicTile(BluetoothCharacteristic c) {
-    return CharacteristicTile(
-      characteristic: c,
-      descriptorTiles: c.descriptors.map((d) => DescriptorTile(descriptor: d)).toList(),
-    );
+  Future onWrite(String text) async{
+    try {
+      await _kenkyuuCharacteristicWrite.write(utf8.encode(text), withoutResponse: _kenkyuuCharacteristicWrite.properties.writeWithoutResponse);
+      Snackbar.show(ABC.c, "Write: Success", success: true);
+      // if (c.properties.read) {
+      //   await c.read();
+      // }
+    } catch (e) {
+      Snackbar.show(ABC.c, prettyException("Write Error:", e), success: false);
+    }
   }
+
+  // List<Widget> _buildServiceTiles(BuildContext context, BluetoothDevice d) {
+  //   return _services
+  //       .map(
+  //         (s) => ServiceTile(
+  //       service: s,
+  //       characteristicTiles: s.characteristics.map((c) => _buildCharacteristicTile(c)).toList(),
+  //     ),
+  //   )
+  //       .toList();
+  // }
+
+  // CharacteristicTile _buildCharacteristicTile(BluetoothCharacteristic c) {
+  //   return CharacteristicTile(
+  //     characteristic: c,
+  //     descriptorTiles: c.descriptors.map((d) => DescriptorTile(descriptor: d)).toList(),
+  //   );
+  // }
 
   Widget buildSpinner(BuildContext context) {
     return Padding(
@@ -191,37 +245,37 @@ class _DeviceScreenState extends State<DeviceScreen> {
     );
   }
 
-  Widget buildGetServices(BuildContext context) {
-    return IndexedStack(
-      index: (_isDiscoveringServices) ? 1 : 0,
-      children: <Widget>[
-        TextButton(
-          child: const Text("Get Services"),
-          onPressed: onDiscoverServicesPressed,
-        ),
-        const IconButton(
-          icon: SizedBox(
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation(Colors.grey),
-            ),
-            width: 18.0,
-            height: 18.0,
-          ),
-          onPressed: null,
-        )
-      ],
-    );
-  }
+  // Widget buildGetServices(BuildContext context) {
+  //   return IndexedStack(
+  //     index: (_isDiscoveringServices) ? 1 : 0,
+  //     children: <Widget>[
+  //       TextButton(
+  //         child: const Text("Get Services"),
+  //         onPressed: onDiscoverServicesPressed,
+  //       ),
+  //       const IconButton(
+  //         icon: SizedBox(
+  //           child: CircularProgressIndicator(
+  //             valueColor: AlwaysStoppedAnimation(Colors.grey),
+  //           ),
+  //           width: 18.0,
+  //           height: 18.0,
+  //         ),
+  //         onPressed: null,
+  //       )
+  //     ],
+  //   );
+  // }
 
-  Widget buildMtuTile(BuildContext context) {
-    return ListTile(
-        title: const Text('MTU Size'),
-        subtitle: Text('$_mtuSize bytes'),
-        trailing: IconButton(
-          icon: const Icon(Icons.edit),
-          onPressed: onRequestMtuPressed,
-        ));
-  }
+  // Widget buildMtuTile(BuildContext context) {
+  //   return ListTile(
+  //       title: const Text('MTU Size'),
+  //       subtitle: Text('$_mtuSize bytes'),
+  //       trailing: IconButton(
+  //         icon: const Icon(Icons.edit),
+  //         onPressed: onRequestMtuPressed,
+  //       ));
+  // }
 
   Widget buildConnectButton(BuildContext context) {
     return Row(children: [
@@ -230,7 +284,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
           onPressed: _isConnecting ? onCancelPressed : (isConnected ? onDisconnectPressed : onConnectPressed),
           child: Text(
             _isConnecting ? "CANCEL" : (isConnected ? "DISCONNECT" : "CONNECT"),
-            style: Theme.of(context).primaryTextTheme.labelLarge?.copyWith(color: Colors.white),
+            style: Theme.of(context).primaryTextTheme.labelLarge?.copyWith(color: Colors.blue),
           ))
     ]);
   }
@@ -251,14 +305,36 @@ class _DeviceScreenState extends State<DeviceScreen> {
               ListTile(
                 leading: buildRssiTile(context),
                 title: Text('Device is ${_connectionState.toString().split('.')[1]}.'),
-                trailing: buildGetServices(context),
               ),
-              buildMtuTile(context),
-              ..._buildServiceTiles(context, widget.device),
-              const SizedBox(
-                height: 200,
-                child: ColoredBox(color: Colors.grey),
-              )
+              Row(
+                children: [
+                  ElevatedButton(onPressed: onRead, child: Text('read')),
+                  Text(utf8.decode(_readReceivedValue)),
+                ],
+              ),
+              Column(
+                children: [
+                  ElevatedButton(
+                      onPressed: (){
+                        onWrite(_writeValue);
+                      },
+                      child: Text('write')),
+                 TextField(
+                   onChanged: (value){
+                     setState(() {
+                       _writeValue = value;
+                     });
+                   },
+                   controller: TextEditingController(text: "init"),
+                 ),
+                ],
+              ),
+              // buildMtuTile(context),
+              // ..._buildServiceTiles(context, widget.device),
+              // const SizedBox(
+              //   height: 200,
+              //   child: ColoredBox(color: Colors.grey),
+              // )
             ],
           ),
         ),
