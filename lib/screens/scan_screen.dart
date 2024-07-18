@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:permission_handler/permission_handler.dart';
 
+import '../utils/peripheral.dart';
 import 'device_screen.dart';
 import 'chat_screen.dart';
 import '../utils/snackbar.dart';
@@ -24,6 +26,9 @@ class _ScanScreenState extends State<ScanScreen> {
   late StreamSubscription<List<ScanResult>> _scanResultsSubscription;
   late StreamSubscription<bool> _isScanningSubscription;
 
+  late Peripheral peripheral;
+  PermissionStatus _permissionStatus = PermissionStatus.denied;
+
   @override
   void initState() {
     super.initState();
@@ -43,6 +48,15 @@ class _ScanScreenState extends State<ScanScreen> {
         setState(() {});
       }
     });
+    Future(() async {
+      await requestPermission(Permission.bluetooth);
+      await requestPermission(Permission.bluetoothAdvertise);
+      await requestPermission(Permission.bluetoothConnect);
+      await requestPermission(Permission.bluetoothScan);
+      peripheral = Peripheral();
+      peripheral.init();
+    });
+
   }
 
   @override
@@ -104,6 +118,15 @@ class _ScanScreenState extends State<ScanScreen> {
     return Future.delayed(Duration(milliseconds: 500));
   }
 
+  Future<void> requestPermission(Permission permission) async {
+    final status = await permission.request();
+    setState(() {
+      print(status);
+      _permissionStatus = status;
+      print(_permissionStatus);
+    });
+  }
+
   Widget buildScanButton(BuildContext context) {
     if (FlutterBluePlus.isScanningNow) {
       return FloatingActionButton(
@@ -134,13 +157,6 @@ class _ScanScreenState extends State<ScanScreen> {
   }
 
   List<Widget> _buildScanResultTiles(BuildContext context) {
-
-    // Battery Service
-    String serviceBattery = "0000180F-0000-1000-8000-00805F9B34FB";
-    String characteristicBatteryLevel = "00002A19-0000-1000-8000-00805F9B34FB";
-    // Test service
-    String serviceTest = "0000180D-0000-1000-8000-00805F9B34FB";
-    String characteristicTest = "00002A18-0000-1000-8000-00805F9B34FB";
 
     String serviceKenkyuu = "db7e2243-3a33-4ebc-944b-1814e86a6299";
     String characteristicKenkyuuWrite = "6a4b3194-1a96-4af1-9630-bf39807743a1";

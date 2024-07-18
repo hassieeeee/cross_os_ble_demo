@@ -34,13 +34,18 @@ class _DeviceScreenState extends State<ChatScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            ElevatedButton(onPressed: central.onRead, child: const Text('read')),
+            ElevatedButton(
+                onPressed:(){
+                  central.onRead();
+                } ,
+                child: const Text('read')
+            ),
             const SizedBox(width: 100),
             ElevatedButton(
                 onPressed:(){
                   central.onWrite('init');
                 },
-                child: const Text('read')
+                child: const Text('write')
             )
           ],
         ),
