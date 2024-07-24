@@ -47,6 +47,7 @@ class Peripheral{
   void init() {
     Future(() async{
       await _initialize();
+      await addServices();
     });
 
     // setup callbacks
@@ -95,10 +96,10 @@ class Peripheral{
     });
 
     // super.onInit();
-    // Future(() async {
-      addServices();
+    Future(() async {
+
       startAdvertising();
-    // });
+    });
 
 
   }
@@ -113,6 +114,7 @@ class Peripheral{
 
   void startAdvertising() async {
     print("Starting Advertising");
+    await Future.delayed(const Duration(milliseconds: 30));
     await BlePeripheral.startAdvertising(
       services: [serviceKenkyuu],
       localName: deviceName,
@@ -125,7 +127,7 @@ class Peripheral{
     await BlePeripheral.stopAdvertising();
   }
 
-  void addServices() async {
+  Future<void> addServices() async {
     try {
       var notificationControlDescriptor = BleDescriptor(
         uuid: "00002908-0000-1000-8000-00805F9B34FB",

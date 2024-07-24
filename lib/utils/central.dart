@@ -120,6 +120,7 @@ class Central {
       _services = await device.discoverServices();
     } catch (e) {
     }
+    print(_services);
     _kenkyuuService = _services.firstWhere((service) => service.uuid == Guid(serviceKenkyuuUuid));
     _kenkyuuCharactaristicRead = _kenkyuuService.characteristics.firstWhere((element) => element.uuid == Guid(characteristicKenkyuuReadUuid));
     _kenkyuuCharacteristicWrite = _kenkyuuService.characteristics.firstWhere((element) => element.uuid == Guid(characteristicKenkyuuWriteUuid));

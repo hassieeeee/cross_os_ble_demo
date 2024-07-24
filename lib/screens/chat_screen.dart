@@ -17,12 +17,21 @@ class ChatScreen extends StatefulWidget {
 class _DeviceScreenState extends State<ChatScreen> {
 
   late Central central;
+  String text = 'kyoeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeuoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooopppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiidddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddtxt';
 
   @override
   void initState() {
     super.initState();
     central = Central(device: widget.device);
     central.init();
+  }
+
+  Future<void> _superWrite() async{
+    await central.onWrite(text);
+    await central.onWrite(text);
+    await central.onWrite(text);
+    await central.onWrite(text);
+    await central.onWrite(text);
   }
 
   @override
@@ -43,7 +52,8 @@ class _DeviceScreenState extends State<ChatScreen> {
             const SizedBox(width: 100),
             ElevatedButton(
                 onPressed:(){
-                  central.onWrite('init');
+                  // central.onWrite('init');
+                  _superWrite();
                 },
                 child: const Text('write')
             )
