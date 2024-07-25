@@ -45,13 +45,9 @@ class Peripheral{
   String characteristicKenkyuuRead = "b42224d1-48be-4ebf-9942-e236d3606b31";
 
   void init() {
-    Future(() async{
-      await _initialize();
-      await addServices();
-    });
 
     // setup callbacks
-    // BlePeripheral.setBleStateChangeCallback(isBleOn);
+    BlePeripheral.setBleStateChangeCallback(blestateprint);
 
     BlePeripheral.setAdvertisingStatusUpdateCallback(
             (bool advertising, String? error) {
@@ -96,12 +92,25 @@ class Peripheral{
     });
 
     // super.onInit();
-    Future(() async {
-
+    Future(() async{
+      await _initialize();
+      await Future.delayed(const Duration(milliseconds: 1000));
+      addServices();
+      await Future.delayed(const Duration(milliseconds: 1000));
       startAdvertising();
+      await Future.delayed(const Duration(milliseconds: 1000));
+      // updateCharacteristic();
     });
 
 
+  }
+
+  void blestateprint(bool isBleOn){
+    if(isBleOn){
+      print('blestate: true');
+    }else{
+      print('blestate: false');
+    }
   }
 
   Future<void> _initialize() async {
@@ -114,7 +123,7 @@ class Peripheral{
 
   void startAdvertising() async {
     print("Starting Advertising");
-    await Future.delayed(const Duration(milliseconds: 30));
+    // await Future.delayed(const Duration(milliseconds: 30));
     await BlePeripheral.startAdvertising(
       services: [serviceKenkyuu],
       localName: deviceName,
@@ -152,7 +161,7 @@ class Peripheral{
                 CharacteristicProperties.write.index,
               ],
               descriptors: [notificationControlDescriptor],
-              value: utf8.encode("Kenkyuuwrite"),
+              // value: utf8.encode("Kenkyuuwrite"),
               permissions: [
                 // AttributePermissions.readable.index,
                 AttributePermissions.writeable.index,
@@ -167,7 +176,7 @@ class Peripheral{
                 // CharacteristicProperties.write.index,
               ],
               descriptors: [notificationControlDescriptor],
-              value: utf8.encode("Kenkyuuread"),
+              // value: utf8.encode("Kenkyuuread"),
               permissions: [
                 AttributePermissions.readable.index,
                 // AttributePermissions.writeable.index,
@@ -175,6 +184,7 @@ class Peripheral{
             ),
           ],
         ),
+        timeout: const Duration(milliseconds: 2000),
       );
 
       print("Services added");
@@ -194,7 +204,7 @@ class Peripheral{
   }
 
   /// Update characteristic value, to all the devices which are subscribed to it
-  void updateCharacteristic() async {
+  Future<void> updateCharacteristic() async {
     try {
       await BlePeripheral.updateCharacteristic(
         characteristicId: characteristicKenkyuuRead,

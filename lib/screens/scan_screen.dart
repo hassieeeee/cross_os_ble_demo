@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
-
+import 'package:flutter/foundation.dart';
 import '../utils/peripheral.dart';
 import 'device_screen.dart';
 import 'chat_screen.dart';
@@ -50,9 +50,11 @@ class _ScanScreenState extends State<ScanScreen> {
     });
     Future(() async {
       await requestPermission(Permission.bluetooth);
-      await requestPermission(Permission.bluetoothAdvertise);
-      await requestPermission(Permission.bluetoothConnect);
-      await requestPermission(Permission.bluetoothScan);
+      if (defaultTargetPlatform == TargetPlatform.android){
+        await requestPermission(Permission.bluetoothAdvertise);
+        await requestPermission(Permission.bluetoothConnect);
+        await requestPermission(Permission.bluetoothScan);
+      }
       peripheral = Peripheral();
       peripheral.init();
     });
@@ -190,6 +192,7 @@ class _ScanScreenState extends State<ScanScreen> {
             children: <Widget>[
               ..._buildSystemDeviceTiles(context),
               ..._buildScanResultTiles(context),
+              ElevatedButton(onPressed: peripheral.updateCharacteristic, child: const Text('update')),
             ],
           ),
         ),
