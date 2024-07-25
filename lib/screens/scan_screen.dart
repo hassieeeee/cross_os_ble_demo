@@ -56,7 +56,7 @@ class _ScanScreenState extends State<ScanScreen> {
         await requestPermission(Permission.bluetoothScan);
       }
       peripheral = Peripheral();
-      peripheral.init();
+      await peripheral.init();
     });
 
   }
@@ -66,6 +66,10 @@ class _ScanScreenState extends State<ScanScreen> {
     _scanResultsSubscription.cancel();
     _isScanningSubscription.cancel();
     super.dispose();
+  }
+
+  Future<void> _update() async{
+    await peripheral.updateCharacteristic();
   }
 
   Future onScanPressed() async {
@@ -192,7 +196,7 @@ class _ScanScreenState extends State<ScanScreen> {
             children: <Widget>[
               ..._buildSystemDeviceTiles(context),
               ..._buildScanResultTiles(context),
-              ElevatedButton(onPressed: peripheral.updateCharacteristic, child: const Text('update')),
+              ElevatedButton(onPressed: _update, child: const Text('update')),
             ],
           ),
         ),

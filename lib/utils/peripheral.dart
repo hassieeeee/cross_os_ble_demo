@@ -44,7 +44,7 @@ class Peripheral{
   String characteristicKenkyuuWrite = "6a4b3194-1a96-4af1-9630-bf39807743a1";
   String characteristicKenkyuuRead = "b42224d1-48be-4ebf-9942-e236d3606b31";
 
-  void init() {
+  Future<void> init() async{
 
     // setup callbacks
     BlePeripheral.setBleStateChangeCallback(blestateprint);
