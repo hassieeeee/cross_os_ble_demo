@@ -94,12 +94,9 @@ class Peripheral{
     // super.onInit();
     Future(() async{
       _initialize();
-      await Future.delayed(const Duration(milliseconds: 3000));
-      addServices();
-      await Future.delayed(const Duration(milliseconds: 3000));
-      startAdvertising();
       await Future.delayed(const Duration(milliseconds: 1000));
-      // updateCharacteristic();
+      await addServices();
+      startAdvertising();
     });
 
 
@@ -136,7 +133,7 @@ class Peripheral{
     await BlePeripheral.stopAdvertising();
   }
 
-  void addServices() async {
+  Future<void> addServices() async {
     try {
       var notificationControlDescriptor = BleDescriptor(
         uuid: "00002908-0000-1000-8000-00805F9B34FB",

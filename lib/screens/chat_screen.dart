@@ -48,7 +48,7 @@ class _DeviceScreenState extends State<ChatScreen> {
                 } ,
                 child: const Text('read')
             ),
-            const SizedBox(width: 100),
+            const SizedBox(width: 50),
             ElevatedButton(
                 onPressed:(){
                   // central.onWrite('init');

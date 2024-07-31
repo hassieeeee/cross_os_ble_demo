@@ -64,6 +64,7 @@ class Central {
       await onConnectPressed();
       await onRequestMtuPressed();
       await onDiscoverServicesPressed();
+      await onSubscribePressed();
 
       _lastValueSubscription = _kenkyuuCharactaristicRead.lastValueStream.listen((value) {
         readReceivedValue = value;
@@ -131,6 +132,25 @@ class Central {
   Future onRequestMtuPressed() async {
     try {
       await device.requestMtu(223, predelay: 0);
+    } catch (e) {
+    }
+  }
+
+  Future onSubscribePressed() async {
+    try {
+      // String op = _kenkyuuCharactaristicRead.isNotifying == false ? "Subscribe" : "Unubscribe";
+      bool success = await _kenkyuuCharactaristicRead.setNotifyValue(_kenkyuuCharactaristicRead.isNotifying == false);
+      if(success) {
+        print("setNotifyValue success!");
+      }
+      else{
+        print("setNotifyValue failed");
+      }
+
+      // if (_kenkyuuCharactaristicRead.properties.read) {
+      //   await _kenkyuuCharactaristicRead.read();
+      // }
+
     } catch (e) {
     }
   }
