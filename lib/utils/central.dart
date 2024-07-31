@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:cross_os_ble_demo/utils/extra.dart';
-import 'package:flutter/material.dart';
+// import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 class Central {
@@ -31,7 +31,7 @@ class Central {
 
   String serviceKenkyuuUuid = "db7e2243-3a33-4ebc-944b-1814e86a6299";
   String characteristicKenkyuuWriteUuid = "6a4b3194-1a96-4af1-9630-bf39807743a1";
-  String characteristicKenkyuuReadUuid = "b42224d1-48be-4ebf-9942-e236d3606b31";
+  String characteristicKenkyuuReadUuid = "00002A18-0000-1000-8000-00805F9B34FB";
 
 
 

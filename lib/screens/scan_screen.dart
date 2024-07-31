@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -68,8 +67,20 @@ class _ScanScreenState extends State<ScanScreen> {
     super.dispose();
   }
 
-  Future<void> _update() async{
-    await peripheral.updateCharacteristic();
+  void _update() {
+    peripheral.updateCharacteristic();
+    // BlePeripheral.updateCharacteristic(
+    //   characteristicId: "b42224d1-48be-4ebf-9942-e236d3606b31",
+    //   value: utf8.encode("Data Changed"),
+    // );
+  }
+
+  void _getService(){
+    peripheral.getAllServices();
+  }
+
+  void _add(){
+    peripheral.addServices();
   }
 
   Future onScanPressed() async {
@@ -121,7 +132,7 @@ class _ScanScreenState extends State<ScanScreen> {
     if (mounted) {
       setState(() {});
     }
-    return Future.delayed(Duration(milliseconds: 500));
+    return Future.delayed(const Duration(milliseconds: 500));
   }
 
   Future<void> requestPermission(Permission permission) async {
@@ -165,8 +176,8 @@ class _ScanScreenState extends State<ScanScreen> {
   List<Widget> _buildScanResultTiles(BuildContext context) {
 
     String serviceKenkyuu = "db7e2243-3a33-4ebc-944b-1814e86a6299";
-    String characteristicKenkyuuWrite = "6a4b3194-1a96-4af1-9630-bf39807743a1";
-    String characteristicKenkyuuRead = "b42224d1-48be-4ebf-9942-e236d3606b31";
+    // String characteristicKenkyuuWrite = "6a4b3194-1a96-4af1-9630-bf39807743a1";
+    // String characteristicKenkyuuRead = "00002A18-0000-1000-8000-00805F9B34FB";
 
 
     return _scanResults.where((element) {
@@ -197,6 +208,8 @@ class _ScanScreenState extends State<ScanScreen> {
               ..._buildSystemDeviceTiles(context),
               ..._buildScanResultTiles(context),
               ElevatedButton(onPressed: _update, child: const Text('update')),
+              ElevatedButton(onPressed: _getService, child: const Text('service')),
+              ElevatedButton(onPressed: _add, child: const Text('add')),
             ],
           ),
         ),
